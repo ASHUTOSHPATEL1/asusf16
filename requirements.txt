@@ -1,0 +1,8 @@
+streamlit>=1.36.0
+sentence-transformers>=3.0.1
+pinecone>=3.0.0
+pypdf>=4.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+cryptography
+

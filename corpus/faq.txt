@@ -1,0 +1,44 @@
+Question: Can I upgrade the RAM?
+Answer: Yes. The laptop has two DDR5 SO-DIMM slots and supports memory upgrades.
+
+Question: Can I upgrade the storage?
+Answer: Yes. The laptop has dual M.2 PCIe Gen 4 SSD slots, allowing storage expansion.
+
+Question: What processor does the ASUS TUF Gaming F16 (2025) use?
+Answer: Depending on the configuration, it can come with processors such as the Intel Core i7-14650HX or Intel Core Ultra 9 275HX.
+
+Question: Which graphics cards are available?
+Answer: Depending on the model, it is available with NVIDIA GeForce RTX 5050, RTX 5060, or RTX 5070 Laptop GPUs.
+
+Question: Does it have a high refresh rate display?
+Answer: Yes. It offers up to a 16-inch 2.5K 165Hz display with G-SYNC support.
+
+Question: Does it support USB-C charging?
+Answer: Yes. The laptop supports USB-C power delivery charging.
+
+Question: Can I use an external monitor?
+Answer: Yes. The laptop provides display output options including HDMI and USB-C connections.
+
+Question: Does it have an Ethernet port?
+Answer: Yes. The laptop includes an RJ45 Ethernet port for wired networking.
+
+Question: Does it have a backlit keyboard?
+Answer: Yes. The ASUS TUF Gaming F16 features a backlit gaming keyboard.
+
+Question: How much RAM can it support?
+Answer: The laptop supports high-speed DDR5 memory and certain configurations support expansion up to 64GB.
+
+Question: How much storage can it support?
+Answer: The laptop includes dual PCIe Gen 4 SSD slots and supports storage expansion through additional SSD upgrades.
+
+Question: Is the laptop suitable for gaming?
+Answer: Yes. It is designed for gaming and includes dedicated NVIDIA GeForce RTX Laptop GPUs and high-refresh-rate displays.
+
+Question: Does it support Wi-Fi and Bluetooth?
+Answer: Yes. The laptop supports modern wireless connectivity including Wi-Fi and Bluetooth.
+
+Question: Is the laptop durable?
+Answer: Yes. The laptop meets MIL-STD-810H durability standards.
+
+Question: Is the laptop portable?
+Answer: Yes. Despite being a gaming laptop, it is designed to be portable and includes a 90Wh battery and relatively slim profile.

@@ -1,0 +1,88 @@
+Product: ASUS TUF Gaming F16 (2025)
+
+Models:
+
+* FX608JPR
+* FX608JMR
+* FX608JH
+
+Operating System:
+Windows 11 Home
+
+Processors:
+
+* Intel Core i7-14650HX, 16 cores, 24 threads, up to 5.2 GHz
+* Intel Core i5-13450HX, 10 cores, up to 4.6 GHz
+
+Graphics:
+
+* NVIDIA GeForce RTX 5070 Laptop GPU, 8GB GDDR7
+* NVIDIA GeForce RTX 5060 Laptop GPU, 8GB GDDR7
+* NVIDIA GeForce RTX 5050 Laptop GPU, 8GB GDDR7
+
+Display:
+16-inch display
+
+* 2.5K (2560 × 1600) or FHD+ (1920 × 1200)
+* 165Hz refresh rate
+* IPS-level
+* Anti-glare
+* G-SYNC
+* NVIDIA Advanced Optimus
+
+Memory:
+32GB DDR5-5600 (16GB × 2)
+Dual-channel memory support
+2 DDR5 SO-DIMM slots
+
+Storage:
+1TB PCIe 4.0 NVMe M.2 SSD
+2 M.2 PCIe 4.0 SSD slots
+
+Ports:
+
+* HDMI 2.1
+* Thunderbolt 4
+* USB-C with DisplayPort and Power Delivery
+* 3 × USB 3.2 Gen 2 Type-A
+* RJ45 Ethernet
+* 3.5mm audio jack
+
+Keyboard:
+Backlit 1-Zone RGB keyboard
+Copilot key
+
+Camera:
+1080p Full HD IR camera with Windows Hello
+
+Audio:
+Dolby Atmos
+AI noise cancellation
+Dual speakers
+Built-in array microphone
+
+Connectivity:
+Wi-Fi 6E
+Bluetooth 5.4
+
+Battery:
+90Wh, 4-cell Li-ion
+
+Charger:
+280W AC adapter
+
+Weight:
+2.20 kg
+
+Dimensions:
+35.4 × 26.9 × 1.79–2.73 cm
+
+Security:
+Firmware TPM
+BIOS password protection
+McAfee 1-year subscription
+
+Software:
+Microsoft Office Home 2024
+Microsoft 365 Basic (100GB cloud storage for 1 year)
+Xbox Game Pass Premium (2 months)

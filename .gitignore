@@ -1,0 +1,14 @@
+# Local environment variables
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Visual Studio Code settings
+.vscode/
+
+# Streamlit local state
+.streamlit/
