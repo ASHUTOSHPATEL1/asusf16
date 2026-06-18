@@ -32,25 +32,23 @@ The chatbot is built using the **Retrieval-Augmented Generation (RAG)** architec
 
 ### 1. The Core RAG Concept (Retrieve -> Augment -> Generate)
 
-Unlike standard LLMs that answer queries from static pre-trained weights, a RAG system first **retrieves** relevant document chunks from a custom database by vectorizing the user query, **augments** the user's prompt with this real-time context, and then passes it to the LLM to **generate** a grounded response.
+Unlike standard LLMs that answer queries from static pre-trained weights, a RAG system first **retrieves** relevant document chunks from a custom database, **augments** the user's prompt with this real-time context, and then passes it to the LLM to **generate** a grounded response.
 
 ```mermaid
-graph TD
-    UserQuery([User Query]) -->|1. Input String| Encoder[Local Embedding Model<br/>all-MiniLM-L6-v2]
-    Encoder -->|2. Dense query vector| VectorSearch[Semantic Query Search]
-    
-    subgraph Retrieval [1. Retrieve Stage]
-        VectorSearch -->|Cosine similarity match| PineconeDB[(Pinecone Vector DB)]
-        PineconeDB -->|Top-K relevant chunks| Chunks[Grounded Context Passages]
+graph LR
+    subgraph Retrieval [1. Retrieve]
+        Query[User Query] -->|Generate Embedding| EmbeddedQuery[Query Vector]
+        EmbeddedQuery -->|Semantic Search| VectorDB[(Pinecone Vector DB)]
+        VectorDB -->|Top-K Chunks| Chunks[Relevant Text Passages]
     end
 
-    subgraph Augmentation [2. Augment Stage]
-        UserQuery & Chunks -->|Enriched context injection| PromptBuilder[Combine Query + Context<br/>+ System Guardrail Prompt]
+    subgraph Augmentation [2. Augment]
+        Query & Chunks -->|Inject Context| ContextPrompt[Grounded LLM Prompt]
     end
 
-    subgraph Generation [3. Generate Stage]
-        PromptBuilder -->|Sends grounded template| LLM[LLM / Generator<br/>Gemini 2.5 / Llama 3]
-        LLM -->|Deterministic output temp=0.0| FinalAnswer[Grounded Final Answer]
+    subgraph Generation [3. Generate]
+        ContextPrompt -->|Sends Prompt| LLM[LLM / Generator]
+        LLM -->|Grounded Answer| Answer[Final Answer]
     end
 ```
 
