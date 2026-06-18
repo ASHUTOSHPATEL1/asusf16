@@ -85,58 +85,28 @@ flowchart TD
 
 ### 3. Real-time Query & Generation Pipeline (End-User Workflow)
 
-This pipeline handles user interaction, classifies query intent with auto-retry logic, applies dynamic filters, performs a fallback search if filtered results are poor, enforces score thresholds, and generates grounded responses:
+This pipeline handles user interaction, categorizes user intent to apply dynamic filters, queries the Pinecone vector index, applies relevancy score guardrails, and constructs grounded responses using OpenRouter:
 
 ```mermaid
-flowchart TD
-    st([Start: User Enters Query]) --> IntentCall[classify_query_intent in intent_classifier.py]
-    
-    subgraph Intent Classifier [1. Intent Classification Stage]
-        IntentCall -->|Call API| OpenRouterClassifier[OpenRouter Classifier Call]
-        OpenRouterClassifier -->|API Error / 429?| RetryClassifier{Attempt < 5?}
-        RetryClassifier -->|Yes| BackoffClassifier[Wait & Retry with Exponential Backoff]
-        BackoffClassifier --> OpenRouterClassifier
-        RetryClassifier -->|No| FallbackClassifier[Default to general_product_question]
-        OpenRouterClassifier -->|Success| ValidateIntent{Valid Intent?}
-        ValidateIntent -->|Yes| SetIntent[Set Intent]
-        ValidateIntent -->|No / Fuzzy| CleanIntent[Clean / Map Fuzzy Intent]
-        CleanIntent --> SetIntent
-        FallbackClassifier --> SetIntent
-    end
-
-    SetIntent --> GuardScope{Intent == out_of_scope?}
-    
-    %% Guardrail 1: Out of Scope
-    GuardScope -->|Yes| Reject1[Return: I don't know from the available info.]
-    
-    subgraph RetrievalStage [2. Document Retrieval & Fallback]
-        GuardScope -->|No| MapFilter[Lookup Doc Type Filter in INTENT_FILTER_MAP]
-        MapFilter --> FilterRetrieve[Retrieve from Pinecone with Filter]
-        FilterRetrieve --> CheckRelevance{Chunks Found & Max Score >= 0.15?}
-        CheckRelevance -->|Yes| FinalChunks[Select Chunks]
-        CheckRelevance -->|No & Filter Applied| FallbackRetrieve[Retrieve from Pinecone without Filter]
-        FallbackRetrieve --> FinalChunks
-    end
-
-    FinalChunks --> GuardScoreThreshold{Max Score >= 0.20?}
-    
-    %% Guardrail 2: Similarity Score Threshold
-    GuardScoreThreshold -->|No| Reject2[Return: I don't know from the available info.]
-    
-    subgraph GenerationStage [3. Grounded Generation Stage]
-        GuardScoreThreshold -->|Yes| BuildPrompt[Format Context Prompt with Chunk Meta & Scores]
-        BuildPrompt --> OpenRouterGen[OpenRouter Generation Call]
-        OpenRouterGen -->|429 Rate Limit?| RetryGen{Attempt < 5?}
-        RetryGen -->|Yes| BackoffGen[Wait & Retry with Exponential Backoff]
-        BackoffGen --> OpenRouterGen
-        RetryGen -->|No| ErrorRaise[Raise Error / Show Warning]
-        OpenRouterGen -->|Success| Answer[Grounded Response]
-    end
-
-    Answer --> Display[Display Response & Pipeline Diagnostics Trace]
-    Reject1 --> Display
-    Reject2 --> Display
-    Display --> ed([End])
+graph TD
+    User([User]) -->|1. Enters Question| App[Streamlit UI - app.py]
+    App -->|2. Executes Pipeline| Pipeline[RAG Orchestrator - rag.py]
+    Pipeline -->|3. Classifies Intent| Classifier[Classifier - intent_classifier.py]
+    Classifier -->|4. Sends Prompt| OpenRouter1[OpenRouter API]
+    OpenRouter1 -->|5. Returns Intent| Classifier
+    Classifier -->|6. Intent setup, spec, etc.| Pipeline
+    Pipeline -->|7. Evaluates Category| Guard1{Is On-Topic?}
+    Guard1 -->|No| Reject1[Return Default Grounded Rejection]
+    Guard1 -->|Yes| Filter[Create Metadata Filter]
+    Filter -->|8. Searches Namespace| Pinecone[(Pinecone DB)]
+    Pinecone -->|9. Returns Chunks & Scores| Pipeline
+    Pipeline -->|10. Evaluates Similarity Score| Guard2{Score >= 0.20?}
+    Guard2 -->|No| Reject2[Return Default Grounded Rejection]
+    Guard2 -->|Yes| Generation[Construct Context Prompt]
+    Generation -->|11. Generates Response| OpenRouter2[OpenRouter API]
+    OpenRouter2 -->|12. Grounded Answer| Pipeline
+    Pipeline -->|13. Returns Answer & Trace| App
+    App -->|14. Displays Answer to User| User
 ```
 
 ### Key Architectural Layers
