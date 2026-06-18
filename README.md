@@ -28,7 +28,64 @@ asus_tuf_rag_project/
 
 ## System Architecture
 
-Below is the complete architectural workflow of the RAG Chatbot:
+The chatbot is built using the **Retrieval-Augmented Generation (RAG)** architecture. Below are the diagrams explaining the core concept, the ingestion infrastructure, and the end-user query workflows:
+
+### 1. The Core RAG Concept (Retrieve -> Augment -> Generate)
+
+Unlike standard LLMs that answer queries from static pre-trained weights, a RAG system first **retrieves** relevant document chunks from a custom database, **augments** the user's prompt with this real-time context, and then passes it to the LLM to **generate** a grounded response.
+
+```mermaid
+graph LR
+    subgraph Retrieval [1. Retrieve]
+        Query[User Query] -->|Semantic Search| VectorDB[(Pinecone Vector DB)]
+        VectorDB -->|Top-K Chunks| Chunks[Relevant Text Passages]
+    end
+
+    subgraph Augmentation [2. Augment]
+        Query & Chunks -->|Inject Context| ContextPrompt[Grounded LLM Prompt]
+    end
+
+    subgraph Generation [3. Generate]
+        ContextPrompt -->|Sends Prompt| LLM[LLM / Generator]
+        LLM -->|Grounded Answer| Answer[Final Answer]
+    end
+```
+
+### 2. Ingestion & Indexing Pipeline (Infrastructure Build)
+
+This pipeline reads raw text and PDF documents, segments them into overlap-protected chunks, extracts metadata tags, generates vector representations locally, and indexes them in Pinecone:
+
+```mermaid
+flowchart TD
+    subgraph Data Prep [1. Knowledge Base Data Ingestion]
+        Files[(corpus/)] -->|Reads txt/pdf| IngestEngine[ingest.py]
+        IngestEngine -->|Loaders| Extract[Text Extraction / PdfReader]
+    end
+
+    subgraph Processing [2. Text Chunking & Metadata Tagging]
+        Extract -->|Raw Text| Chunker[Chunking: ~500 words, 50-word overlap]
+        Chunker -->|Chunk Blocks| Metadata[Add Metadata Tags:<br/>- source_file<br/>- document_type<br/>- chunk_id]
+    end
+
+    subgraph Embedding [3. Local Embedding Generation]
+        Metadata -->|Text Chunks| LocalLLM[all-MiniLM-L6-v2 Model]
+        LocalLLM -->|Generate Vector| Vectors[384-Dimensional Dense Vectors]
+    end
+
+    subgraph Indexing [4. Pinecone Vector Storage]
+        Vectors -->|Batch Payload| VectorStore[vector_store.py]
+        VectorStore -->|Verify Index| IndexCheck{Index exists?}
+        IndexCheck -->|No| CreateIndex[Create Pinecone Index<br/>Metric: cosine]
+        IndexCheck -->|Yes| ConnectIndex[Connect to Index]
+        CreateIndex --> Upsert[Upsert Vectors & Metadata]
+        ConnectIndex --> Upsert
+        Upsert -->|Store in Namespace:<br/>asus_tuf_gaming_f16_2025| Pinecone[(Pinecone Index)]
+    end
+```
+
+### 3. Real-time Query & Generation Pipeline (End-User Workflow)
+
+This pipeline handles user interaction, categorizes user intent to apply dynamic filters, queries the Pinecone vector index, applies relevancy score guardrails, and constructs grounded responses using OpenRouter:
 
 ```mermaid
 graph TD
