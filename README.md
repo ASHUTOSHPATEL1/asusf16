@@ -85,28 +85,47 @@ flowchart TD
 
 ### 3. Real-time Query & Generation Pipeline (End-User Workflow)
 
-This pipeline handles user interaction, categorizes user intent to apply dynamic filters, queries the Pinecone vector index, applies relevancy score guardrails, and constructs grounded responses using OpenRouter:
+This pipeline handles user interaction, classifies query intent with auto-retry logic, encodes the search query, queries Pinecone with metadata filters, runs fallback searches when necessary, validates score thresholds, and generates grounded responses:
 
 ```mermaid
 graph TD
     User([User]) -->|1. Enters Question| App[Streamlit UI - app.py]
-    App -->|2. Executes Pipeline| Pipeline[RAG Orchestrator - rag.py]
+    App -->|2. Calls Orchestrator| Pipeline[RAG Orchestrator - rag.py]
+    
+    %% Intent Stage
     Pipeline -->|3. Classifies Intent| Classifier[Classifier - intent_classifier.py]
-    Classifier -->|4. Sends Prompt| OpenRouter1[OpenRouter API]
+    Classifier -->|4. Query with Retry Loop| OpenRouter1[OpenRouter API]
     OpenRouter1 -->|5. Returns Intent| Classifier
-    Classifier -->|6. Intent setup, spec, etc.| Pipeline
-    Pipeline -->|7. Evaluates Category| Guard1{Is On-Topic?}
-    Guard1 -->|No| Reject1[Return Default Grounded Rejection]
-    Guard1 -->|Yes| Filter[Create Metadata Filter]
-    Filter -->|8. Searches Namespace| Pinecone[(Pinecone DB)]
-    Pinecone -->|9. Returns Chunks & Scores| Pipeline
-    Pipeline -->|10. Evaluates Similarity Score| Guard2{Score >= 0.20?}
-    Guard2 -->|No| Reject2[Return Default Grounded Rejection]
-    Guard2 -->|Yes| Generation[Construct Context Prompt]
-    Generation -->|11. Generates Response| OpenRouter2[OpenRouter API]
+    Classifier -->|6. Intent Category| Pipeline
+    
+    %% Out of Scope Guard
+    Pipeline -->|7. Check Intent| Guard1{Intent == 'out_of_scope'?}
+    Guard1 -->|Yes| Reject1[Return Grounded Rejection]
+    
+    %% Retrieval Stage
+    Guard1 -->|No| Filter[Map Filter & Encode Query to Vector<br/>Local Model: all-MiniLM-L6-v2]
+    Filter -->|8. Query Vector + Filter| Pinecone[Pinecone Vector DB]
+    Pinecone -->|9. Returns Chunks & Scores| MatchCheck{Chunks Found & Max Score >= 0.15?}
+    
+    %% Fallback Stage
+    MatchCheck -->|No & Filter Applied| FallbackSearch[Fallback: Re-Query Pinecone Without Filters]
+    FallbackSearch -->|Get Chunks| MergeChunks[Select Retrieved Chunks]
+    MatchCheck -->|Yes| MergeChunks
+    
+    %% Similarity Threshold Guard
+    MergeChunks -->|10. Evaluate Relevance| Guard2{Max Similarity Score >= 0.20?}
+    Guard2 -->|No| Reject2[Return Grounded Rejection]
+    
+    %% Generation Stage
+    Guard2 -->|Yes| PromptBuilder[Construct Grounded Context Prompt]
+    PromptBuilder -->|11. Call LLM with Retry Loop| OpenRouter2[OpenRouter LLM]
     OpenRouter2 -->|12. Grounded Answer| Pipeline
-    Pipeline -->|13. Returns Answer & Trace| App
-    App -->|14. Displays Answer to User| User
+    
+    %% Return
+    Pipeline -->|13. Returns Answer & Trace Info| App
+    Reject1 --> App
+    Reject2 --> App
+    App -->|14. Renders Answer & Badges| User
 ```
 
 ### Key Architectural Layers
